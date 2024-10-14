@@ -212,6 +212,10 @@ class API:
                 return True
             else:
                 return False
+        
+        def raiseErr(self):
+            if self.code >= 400:
+                raise Exception()
 
     @staticmethod
     def post(uri:str,data = {}):
@@ -243,8 +247,17 @@ class API:
 
     class GET:
         @staticmethod
-        def transaction(params = {}):
+        def transaction(transactionId:str = None,indexId:int = None,address:str = None,source:str = None,dest:str = None,tokenId:int = None,indexId_from:int = None):
             """return [[Transaction,timestamp]]"""
+            params = {
+                'transactionId':transactionId,
+                'indexId':indexId,
+                'address':address,
+                'source':source,
+                'dest':dest,
+                'tokenId':tokenId,
+                'indexId_from':indexId_from
+            }
             response = API.get('/exploler/transaction',params)
             transactions = []
             for i in response:
@@ -264,15 +277,18 @@ class API:
             return transactions
         
         @staticmethod
-        def balance(params = {}):
+        def balance(address:str = None):
+            params = {'address':address}
             return API.get('/exploler/balance',params)
     
         @staticmethod
-        def token_balance(params = {}):
+        def token_balance(address:str = None,tokenId:int = None):
+            params = {'address':address,'tokenId':tokenId}
             return API.get('/exploler/token_balance',params)
         
         @staticmethod
-        def tokens(params = {}):
+        def tokens(issuer:str = None, tokenId:int = None):
+            params = {'issuer':issuer,'tokenId':tokenId}
             response = API.get('/exploler/tokens',params)
             tokenlist:list[Token] = []
             for tokeninfo in response:
