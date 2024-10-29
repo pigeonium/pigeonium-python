@@ -193,7 +193,7 @@ class Transaction:
 
 
 class API:
-    VERSION = 0
+    VERSION = 1
     SERVER = f"https://pigeonium.h4ribote.net/api/v{VERSION}"
 
     class RESPONSE:
@@ -258,7 +258,7 @@ class API:
                 'tokenId':tokenId,
                 'indexId_from':indexId_from
             }
-            response = API.get('/exploler/transaction',params)
+            response = API.get('/explorer/transaction',params)
             transactions = []
             for i in response:
                 transaction = Transaction()
@@ -279,17 +279,17 @@ class API:
         @staticmethod
         def balance(address:str = None):
             params = {'address':address}
-            return API.get('/exploler/balance',params)
+            return API.get('/explorer/balance',params)
     
         @staticmethod
         def token_balance(address:str = None,tokenId:int = None):
             params = {'address':address,'tokenId':tokenId}
-            return API.get('/exploler/token_balance',params)
+            return API.get('/explorer/token_balance',params)
         
         @staticmethod
         def tokens(issuer:str = None, tokenId:int = None):
             params = {'issuer':issuer,'tokenId':tokenId}
-            response = API.get('/exploler/tokens',params)
+            response = API.get('/explorer/tokens',params)
             tokenlist:list[Token] = []
             for tokeninfo in response:
                 token = Token()
