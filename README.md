@@ -2,7 +2,7 @@
 
 「ゲームとか独自のコミュニティ用に仮想通貨っぽい雰囲気の通貨を使いたい！」って人に向けた、セットアップが簡単だし作りが雑なやつ
 
-エクスプローラー: https://h4ribote.jp/pigeonium/explorer/transaction.html?indexId=0
+エクスプローラー: https://h4ribote.jp/pigeonium/explorer/transaction/0
 
 ## Usage
 
