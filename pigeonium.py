@@ -2,6 +2,7 @@ from ecdsa import SigningKey, VerifyingKey, NIST256p
 import hashlib
 import requests
 
+__version__ = 2
 PIGEONIUM_PRIME = 9223372036854775057
 TRANSACTION_FEE = 100000 # per 1byte
 
@@ -81,11 +82,11 @@ class Wallet:
     
     def sign(self,data:bytes):
         private_key = SigningKey.from_string(self.privateKey,NIST256p)
-        signature = bytes.fromhex(private_key.sign(data).hex())
+        signature = private_key.sign(data)
         return signature
 
     def verify_signature(self,signature:bytes,data:bytes):
-        public_key = VerifyingKey.from_string(bytes.fromhex(self.publicKey),NIST256p)
+        public_key = VerifyingKey.from_string(self.publicKey,NIST256p)
         try:
             if public_key.verify(signature,data):
                 return True
@@ -134,7 +135,7 @@ class Token:
 class Transaction:
     def __init__(self) -> None:
         self.indexId:int = None
-        self.transactionId:str = None
+        self.transactionId:bytes = None
         self.source:str = None
         self.dest:str = None
         self.amount:int = None
@@ -146,7 +147,7 @@ class Transaction:
     
     def showInfo(self):
         print(f"indexId        | {self.indexId}")
-        print(f"transactionId  | {self.transactionId}")
+        print(f"transactionId  | {self.transactionId.hex()}")
         print(f"source         | {self.source}")
         print(f"dest           | {self.dest}")
         print(f"amount         | {self.amount}")
@@ -162,7 +163,7 @@ class Transaction:
         transaction = cls()
         transaction_data = hashlib.sha256(f"{source}{dest}{amount}{tokenId}{tokenAmount}"
                                           f"{inputData.hex()}".encode()).digest()
-        transaction_id = SigningKey.from_string(privateKey,NIST256p).sign(transaction_data).hex()
+        transaction_id = SigningKey.from_string(privateKey,NIST256p).sign(transaction_data)
         transaction.indexId = None
         transaction.transactionId = transaction_id
         transaction.source = source
@@ -184,7 +185,7 @@ class Transaction:
                                           f"{self.inputData.hex()}".encode()).digest()
         public_key = VerifyingKey.from_string(self.publicKey,NIST256p)
         try:
-            if public_key.verify(bytes.fromhex(self.transactionId),transaction_data):
+            if public_key.verify(self.transactionId,transaction_data):
                 return True
             else:
                 return False
@@ -233,7 +234,7 @@ class API:
         @staticmethod
         def transaction(transaction:Transaction):
             data = {
-                'transactionId': transaction.transactionId,
+                'transactionId': transaction.transactionId.hex(),
                 'source': transaction.source,
                 'dest': transaction.dest,
                 'amount': transaction.amount,
@@ -247,10 +248,10 @@ class API:
 
     class GET:
         @staticmethod
-        def transaction(transactionId:str = None,indexId:int = None,address:str = None,source:str = None,dest:str = None,tokenId:int = None,indexId_from:int = None):
+        def transaction(transactionId:bytes = None,indexId:int = None,address:str = None,source:str = None,dest:str = None,tokenId:int = None,indexId_from:int = None):
             """return [[Transaction,timestamp]]"""
             params = {
-                'transactionId':transactionId,
+                'transactionId':transactionId.hex(),
                 'indexId':indexId,
                 'address':address,
                 'source':source,
@@ -263,7 +264,7 @@ class API:
             for i in response:
                 transaction = Transaction()
                 transaction.indexId = int(i['indexId'])
-                transaction.transactionId = i['transactionId']
+                transaction.transactionId = bytes.fromhex(i['transactionId'])
                 transaction.source = i['source']
                 transaction.dest = i['dest']
                 transaction.amount = int(i['amount'])
@@ -299,4 +300,3 @@ class API:
                 token.issuer = tokeninfo['issuer']
                 tokenlist.append(token)
             return tokenlist
-        
